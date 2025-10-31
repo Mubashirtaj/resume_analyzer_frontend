@@ -1,0 +1,20 @@
+// app/resume/[id]/page.tsx
+
+import Chatpage from "@/components/pages/chat";
+import React from "react";
+
+interface Props {
+  params: { id: string };
+}
+
+const Page = async ({ params }: Props) => {
+  const { id } = await params; // NO await here
+  return (
+    <div className="text-white">
+      Hello {id}
+      <Chatpage id={id} />
+    </div>
+  );
+};
+
+export default Page;
