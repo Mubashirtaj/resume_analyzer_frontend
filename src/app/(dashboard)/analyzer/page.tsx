@@ -1,40 +1,19 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Upload,
-  FileText,
-  Loader2,
-  CheckCircle,
-  XCircle,
-  Sun,
-  Moon,
-} from "lucide-react";
-import { useTheme } from "@/context/ThemeContext";
+import { Upload, FileText, Loader2, CheckCircle, Sun, Moon, Sparkles } from 'lucide-react';
 import { useUploadFile } from "@/service/uploadresume";
-import { useRouter } from "next/navigation";
-
-interface isSuccess {
-  type: "success" | "error" | null;
-}
+import { useRouter } from 'next/navigation';
+import { useTheme } from "@/context/ThemeContext";
 
 const PDFUploadComponent: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  //   const [isPending, setisPending] = useState<boolean>(false);
-  //   const [isSuccess, setisSuccess] = useState<"success" | "error" | null>(
-  //     null
-  //   );
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisComplete, setAnalysisComplete] = useState(false);
   const router = useRouter();
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
-  const { isDark, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const {
-    mutateAsync: uploadFileAsync,
-    isPending,
-    isSuccess,
-    isError,
-  } = useUploadFile();
-
-  // Check for saved theme preference or default to light mode
+  const { mutateAsync: uploadFileAsync, isPending, isSuccess } = useUploadFile();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const selectedFile = e.target.files?.[0];
@@ -59,23 +38,32 @@ const PDFUploadComponent: React.FC = () => {
   const handleUpload = async (): Promise<void> => {
     if (!file) return;
 
+    setIsAnalyzing(true);
+
     try {
+      // Simulate analysis time for visual effect
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       const result = await uploadFileAsync(file);
-      console.log("Upload result:", result);
+      
+      setAnalysisComplete(true);
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Redirect to /chat/:id
-      if (result.id) {
-        router.push(`/chat/${result.id}`);
+      if (result.cv.id) {
+        router.push(`/chat/${result.cv.id}`);
       }
     } catch (error) {
       console.error("Upload failed:", error);
-    } finally {
+      setIsAnalyzing(false);
     }
   };
 
   const resetUpload = (): void => {
     setFile(null);
     setPdfPreview(null);
+    setIsAnalyzing(false);
+    setAnalysisComplete(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -83,246 +71,225 @@ const PDFUploadComponent: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen min-w-full max-w-full  p-4 sm:p-8 flex items-center justify-center transition-colors duration-300 ${
-        isDark
-          ? "bg-gradient-to-br from-neutral-900 to-neutral-800"
-          : "bg-white"
+      className={`min-h-screen w-full p-4 sm:p-8 flex items-center justify-center transition-colors duration-300 ${
+        theme === "dark"
+          ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
+          : "bg-gradient-to-br from-slate-50 via-white to-slate-50"
       }`}
     >
-      <div className="w-full max-w-4xl">
-        <div
-          className={`rounded-2xl  p-6 sm:p-10 transition-colors duration-300 ${
-            isDark ? "bg-neutral-800" : "bg-white"
-          }`}
-        >
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={toggleTheme}
-              className={`p-3 rounded-full transition-all duration-300 ${
-                isDark
-                  ? "bg-neutral-700 hover:bg-neutral-600 text-yellow-400"
-                  : "bg-neutral-200 hover:bg-neutral-300 text-indigo-600"
-              }`}
-              aria-label="Toggle theme"
-            >
-              {isDark ? (
-                <Sun className="w-6 h-6" />
-              ) : (
-                <Moon className="w-6 h-6" />
-              )}
-            </button>
-          </div>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl opacity-20 ${
+          theme === "dark" ? "bg-indigo-600" : "bg-indigo-300"
+        } animate-pulse`} />
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl opacity-20 ${
+          theme === "dark" ? "bg-purple-600" : "bg-purple-300"
+        } animate-pulse delay-1000`} />
+      </div>
 
-          <h1
-            className={`text-3xl font-bold mb-8 text-center transition-colors duration-300 ${
-              isDark ? "text-neutral-100" : "text-neutral-800"
+      <div className="w-full max-w-2xl relative z-10">
+        {/* Header with theme toggle */}
+        <div className="flex justify-between items-center mb-12">
+          <div>
+            <h1 className={`text-4xl font-bold mb-2 ${
+              theme === "dark" ? "text-white" : "text-slate-900"
+            }`}>
+              Upload Your CV
+            </h1>
+            <p className={`text-lg ${
+              theme === "dark" ? "text-slate-400" : "text-slate-600"
+            }`}>
+              Get your resume analyzed and improved
+            </p>
+          </div>
+          {/* <button
+            onClick={toggleTheme}
+            className={`p-3 rounded-full transition-all duration-300 ${
+              theme === "dark"
+                ? "bg-slate-800 hover:bg-slate-700 text-yellow-400"
+                : "bg-slate-200 hover:bg-slate-300 text-indigo-600"
+            }`}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="w-6 h-6" />
+            ) : (
+              <Moon className="w-6 h-6" />
+            )}
+          </button> */}
+        </div>
+
+        {!file ? (
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-3xl p-16 text-center cursor-pointer transition-all duration-300 group ${
+              theme === "dark"
+                ? "border-indigo-500 hover:border-indigo-400 hover:bg-slate-800/50"
+                : "border-indigo-300 hover:border-indigo-500 hover:bg-indigo-50/50"
             }`}
           >
-            PDF Upload Center
-          </h1>
-
-          {!file ? (
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-4 border-dashed rounded-xl p-12 sm:p-20 text-center cursor-pointer transition-all duration-300 transform hover:scale-105 ${
-                isDark
-                  ? "border-indigo-600 hover:border-indigo-400 hover:bg-neutral-700"
-                  : "border-indigo-300 hover:border-indigo-500 hover:bg-indigo-50"
-              }`}
-            >
-              <Upload
-                className={`w-20 h-20 sm:w-28 sm:h-28 mx-auto mb-6 transition-colors duration-300 ${
-                  isDark ? "text-indigo-400" : "text-indigo-400"
-                }`}
-              />
-              <h2
-                className={`text-2xl font-semibold mb-3 transition-colors duration-300 ${
-                  isDark ? "text-neutral-200" : "text-neutral-700"
-                }`}
-              >
-                Click to Upload PDF
-              </h2>
-              <p
-                className={`transition-colors duration-300 ${
-                  isDark ? "text-neutral-400" : "text-neutral-500"
-                }`}
-              >
-                or drag and drop your PDF file here
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={handleFileSelect}
-                name="resume"
-                id="resume"
-                className="hidden"
-              />
+            <div className="flex justify-center mb-6">
+              <div className={`p-6 rounded-2xl transition-all duration-300 group-hover:scale-110 ${
+                theme === "dark"
+                  ? "bg-indigo-600/20"
+                  : "bg-indigo-100"
+              }`}>
+                <Upload className={`w-16 h-16 ${
+                  theme === "dark" ? "text-indigo-400" : "text-indigo-600"
+                }`} />
+              </div>
             </div>
-          ) : (
+            <h2 className={`text-2xl font-bold mb-2 ${
+              theme === "dark" ? "text-white" : "text-slate-900"
+            }`}>
+              Click to upload PDF
+            </h2>
+            <p className={`mb-4 ${
+              theme === "dark" ? "text-slate-400" : "text-slate-600"
+            }`}>
+              or drag and drop your CV here
+            </p>
+            <p className={`text-sm ${
+              theme === "dark" ? "text-slate-500" : "text-slate-500"
+            }`}>
+              Supported format: PDF up to 10MB
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
+        ) : (
+          <div className={`rounded-3xl p-8 transition-all duration-300 ${
+            isAnalyzing ? "scale-105" : "scale-100"
+          } ${
+            theme === "dark"
+              ? "bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700"
+              : "bg-gradient-to-br from-white to-slate-100 border border-slate-200"
+          }`}>
             <div className="space-y-6">
-              <div
-                className={`relative rounded-xl p-8 overflow-hidden transition-colors duration-300 ${
-                  isDark
-                    ? "bg-gradient-to-br from-neutral-700 to-neutral-600"
-                    : "bg-gradient-to-br from-neutral-100 to-neutral-200"
-                }`}
-              >
-                {isPending && (
-                  <div className="absolute inset-0 bg-indigo-500 bg-opacity-10 flex items-center justify-center z-10">
-                    <div
-                      className="absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-indigo-300 to-transparent opacity-30"
-                      style={{
-                        animation: "scan 2s linear infinite",
-                        backgroundSize: "200% 100%",
-                      }}
+              {/* PDF Preview */}
+              <div className={`relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
+                isAnalyzing ? "border-indigo-500 shadow-2xl shadow-indigo-500/50" : "border-slate-300 dark:border-slate-600"
+              }`}>
+                {isAnalyzing && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-30 animate-pulse z-20" />
+                )}
+                
+                <div className={`w-full h-64 flex items-center justify-center rounded-2xl ${
+                  theme === "dark"
+                    ? "bg-slate-700"
+                    : "bg-slate-200"
+                }`}>
+                  {pdfPreview ? (
+                    <iframe
+                      src={`${pdfPreview}#page=1`}
+                      className="w-full h-full pointer-events-none rounded-2xl"
+                      title="PDF Preview"
                     />
+                  ) : (
+                    <FileText className={`w-20 h-20 ${
+                      theme === "dark" ? "text-slate-500" : "text-slate-400"
+                    }`} />
+                  )}
+                </div>
+
+                {/* Analyzing Overlay */}
+                {isAnalyzing && (
+                  <div className={`absolute inset-0 flex flex-col items-center justify-center rounded-2xl backdrop-blur-sm ${
+                    theme === "dark"
+                      ? "bg-slate-900/80"
+                      : "bg-white/80"
+                  }`}>
+                    {!analysisComplete ? (
+                      <>
+                        <Loader2 className="w-16 h-16 text-indigo-500 animate-spin mb-4" />
+                        <p className={`text-lg font-semibold ${
+                          theme === "dark" ? "text-white" : "text-slate-900"
+                        }`}>
+                          Analyzing your CV
+                        </p>
+                        <p className={`text-sm ${
+                          theme === "dark" ? "text-slate-400" : "text-slate-600"
+                        }`}>
+                          Please wait...
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-16 h-16 text-green-500 mb-4 animate-bounce" />
+                        <p className={`text-lg font-semibold ${
+                          theme === "dark" ? "text-white" : "text-slate-900"
+                        }`}>
+                          Analysis Complete!
+                        </p>
+                      </>
+                    )}
                   </div>
                 )}
-
-                <div className="flex flex-col sm:flex-row items-center gap-6">
-                  <div className="relative flex-shrink-0">
-                    <div
-                      className={`w-32 h-40 rounded-lg shadow-lg flex items-center justify-center border-2 overflow-hidden transition-colors duration-300 ${
-                        isDark
-                          ? "bg-neutral-800 border-neutral-600"
-                          : "bg-white border-neutral-300"
-                      }`}
-                    >
-                      {pdfPreview ? (
-                        <iframe
-                          src={`${pdfPreview}#page=1`}
-                          className="w-full h-full pointer-events-none"
-                          title="PDF Preview"
-                        />
-                      ) : (
-                        <FileText
-                          className={`w-16 h-16 transition-colors duration-300 ${
-                            isDark ? "text-neutral-500" : "text-neutral-400"
-                          }`}
-                        />
-                      )}
-                    </div>
-                    {isPending && (
-                      <div
-                        className={`absolute inset-0 flex items-center justify-center rounded-lg transition-colors duration-300 ${
-                          isDark
-                            ? "bg-neutral-800 bg-opacity-70"
-                            : "bg-white bg-opacity-70"
-                        }`}
-                      >
-                        <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0 text-center sm:text-left">
-                    <h3
-                      className={`text-xl font-semibold truncate mb-2 transition-colors duration-300 ${
-                        isDark ? "text-neutral-100" : "text-neutral-800"
-                      }`}
-                    >
-                      {file.name}
-                    </h3>
-                    <p
-                      className={`mb-4 transition-colors duration-300 ${
-                        isDark ? "text-neutral-300" : "text-neutral-600"
-                      }`}
-                    >
-                      Size: {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-
-                    {isPending && (
-                      <div className="space-y-2">
-                        <div
-                          className={`flex items-center justify-center sm:justify-start gap-2 transition-colors duration-300 ${
-                            isDark ? "text-indigo-400" : "text-indigo-600"
-                          }`}
-                        >
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          <span className="font-medium">
-                            Scanning and uploading...
-                          </span>
-                        </div>
-                        <div
-                          className={`w-full rounded-full h-2 overflow-hidden transition-colors duration-300 ${
-                            isDark ? "bg-neutral-600" : "bg-neutral-300"
-                          }`}
-                        >
-                          <div
-                            className="h-full bg-indigo-600 rounded-full animate-pulse"
-                            style={{ width: "70%" }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {isSuccess && (
-                      <div
-                        className={`flex items-center justify-center sm:justify-start gap-2 transition-colors duration-300 ${
-                          isDark ? "text-green-400" : "text-green-600"
-                        }`}
-                      >
-                        <CheckCircle className="w-6 h-6" />
-                        <span className="font-medium">Upload successful!</span>
-                      </div>
-                    )}
-
-                    {!isSuccess && (
-                      <div
-                        className={`flex items-center justify-center sm:justify-start gap-2 transition-colors duration-300 ${
-                          isDark ? "text-red-400" : "text-red-600"
-                        }`}
-                      >
-                        <XCircle className="w-6 h-6" />
-                        <span className="font-medium">
-                          Upload failed. Please try again.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              {/* File Info */}
+              <div>
+                <h3 className={`text-xl font-semibold mb-2 ${
+                  theme === "dark" ? "text-white" : "text-slate-900"
+                }`}>
+                  {file.name}
+                </h3>
+                <p className={`text-sm ${
+                  theme === "dark" ? "text-slate-400" : "text-slate-600"
+                }`}>
+                  Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+
+              {/* Upload Button */}
+              <div className="flex gap-4 pt-4">
                 <button
                   onClick={handleUpload}
-                  disabled={isPending || isSuccess}
-                  className="flex-1 bg-indigo-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-indigo-700 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-95"
+                  disabled={isAnalyzing || isSuccess}
+                  className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:scale-100 flex items-center justify-center gap-2 ${
+                    isAnalyzing || isSuccess
+                      ? "bg-slate-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
+                  }`}
                 >
-                  {isPending
-                    ? "Uploading..."
-                    : isSuccess
-                    ? "Uploaded"
-                    : "Upload PDF"}
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : isSuccess ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Uploaded
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Submit CV
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={resetUpload}
-                  disabled={isPending}
-                  className={`flex-1 sm:flex-none py-4 px-6 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ${
-                    isDark
-                      ? "bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
-                      : "bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
+                  disabled={isAnalyzing}
+                  className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 ${
+                    theme === "dark"
+                      ? "bg-slate-700 text-slate-200 hover:bg-slate-600 disabled:opacity-50"
+                      : "bg-slate-200 text-slate-700 hover:bg-slate-300 disabled:opacity-50"
                   }`}
                 >
                   Cancel
                 </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
-      <style>{`
-        @keyframes scan {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-      `}</style>
     </div>
   );
 };

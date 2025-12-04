@@ -1,5 +1,7 @@
 import { SidebarDemo } from "@/components/ui/left-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { UserProvider } from "@/context/userdataContext";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,14 +16,17 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <ThemeProvider>
+    <UserProvider>
+
         <div className="flex flex-row">
           <div>
+<SidebarProvider>
             <SidebarDemo />
+</SidebarProvider>
           </div>
           <div className="w-full"> {children}</div>
         </div>
-      </ThemeProvider>
+    </UserProvider>
     </>
   );
 }

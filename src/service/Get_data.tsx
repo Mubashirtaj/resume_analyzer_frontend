@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import api from "@/lib/axios"; // ← your JWT + refresh token Axios instance
 
 const fetchData = async (url: string) => {
-  const res = await axios.get(url);
+  const res = await api.get(url); 
   return res.data;
 };
 

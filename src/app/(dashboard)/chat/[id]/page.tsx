@@ -8,10 +8,9 @@ interface Props {
 }
 
 const Page = async ({ params }: Props) => {
-  const { id } = await params; // NO await here
+  const { id } = await params; 
   return (
     <div className="text-white">
-      Hello {id}
       <Chatpage id={id} />
     </div>
   );
