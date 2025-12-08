@@ -9,16 +9,7 @@ import { ResumeCanvas } from "./resume-canvas"
 import { ShareModal } from "./share-modal"
 import { CanvasElement } from "./canvas-element"
 import {  PrintResume } from "@/app/utils/exportResumeTextPDF"
-const normalizeColors = (node: HTMLElement) => {
-  const elements = node.querySelectorAll("*");
-  elements.forEach((el: HTMLElement) => {
-    const computed = getComputedStyle(el);
-    const color = computed.color;
-    const bg = computed.backgroundColor;
-    el.style.color = color;
-    el.style.backgroundColor = bg;
-  });
-};
+
 
 type ResumeElement = {
   id: string
@@ -324,14 +315,17 @@ const handleDownloadPDF = async () => {
         onElementClick={handleElementClick}
         onMouseDown={handleMouseDown}
         onDoubleClick={startTextEdit}
-        onMouseEnter={(e) => {
-          if (!isSelected && !isDragging) {
-            e.currentTarget.style.border  = "1px dashed #94a3b8" 
-          }
-        }}
+      onMouseEnter={(e) => {
+  if (!isSelected && !isDragging) {
+    const target = e.currentTarget as HTMLElement;
+    target.style.border = "1px dashed #94a3b8";
+  }
+}}
+
         onMouseLeave={(e) => {
           if (!isSelected) {
-            e.currentTarget.style.border = "1px solid transparent"
+            const target = e.currentTarget as HTMLElement;
+            target.style.border = "1px solid transparent"
           }
         }}
         renderElement={renderElement}

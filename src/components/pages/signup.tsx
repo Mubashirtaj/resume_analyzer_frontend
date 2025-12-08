@@ -196,7 +196,7 @@ const Signup = () => {
           bg-gradient-to-tl from-gray-900 to-slate-800 
           hover:opacity-90"
         >
-          {signupMutation.isLoading ? "Signing up..." : "Sign up"}
+         
         </button>
       </div>
 

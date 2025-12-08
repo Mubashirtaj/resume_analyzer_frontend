@@ -12,7 +12,7 @@ export default function BlockNoteEditor({
   initialContent, 
   onContentChange 
 }: BlockNoteEditorProps) {
-  const editor = useCreateBloc  kNote();
+  const editor = useCreateBlockNote();
 
   useEffect(() => {
     if (initialContent) {

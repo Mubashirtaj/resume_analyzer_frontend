@@ -23,8 +23,11 @@ import {
   Linkedin,
 } from 'lucide-react';
 import Link from 'next/link';
+import { isLoggedIn } from '@/lib/auth';
 
 export default function Home() {
+    const loggedIn = isLoggedIn();
+
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
@@ -110,8 +113,17 @@ export default function Home() {
               Contact
             </button>
           </div>
-
-          <Button
+                 {loggedIn ? (
+         <Button
+            // onClick={() => scrollToSection('pricing')}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Link href={'/analyzer'}>
+            Dashbaord
+            </Link>
+          </Button>
+      ) : (
+         <Button
             // onClick={() => scrollToSection('pricing')}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
@@ -119,6 +131,8 @@ export default function Home() {
             Get Started
             </Link>
           </Button>
+      )}
+         
         </div>
       </nav>
 
